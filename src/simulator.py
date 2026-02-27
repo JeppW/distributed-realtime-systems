@@ -76,9 +76,9 @@ def simulate(tasks: List[Task], policy: str) -> dict:
     }
 
 
-def write_results(results: dict, tasks: List[Task], policy: str, out_dir: str, name: str):
+def write_results(results: dict, tasks: List[Task], policy: str, out_dir: str, filenum: str, dataset: str):
     os.makedirs(out_dir, exist_ok=True)
-    base = f"{name}_{policy}"
+    base = f"{dataset}_{filenum}_{policy}"
 
     # 1. Schedule trace CSV
     trace_path = os.path.join(out_dir, f"{base}_trace.csv")
@@ -91,7 +91,7 @@ def write_results(results: dict, tasks: List[Task], policy: str, out_dir: str, n
     # 2. Summary JSON
     summary = {
         "policy": policy,
-        "taskset": name,
+        "taskset": f"{dataset}/{filenum}",
         "num_tasks": len(tasks),
         "hyperperiod": results["hyperperiod"],
         "feasible": results["feasible"],
