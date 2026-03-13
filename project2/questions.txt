@@ -1,0 +1,2 @@
+- why does it say only two queues in the project pdf when there are three? does that just assume that the BE queue is there but not under analysis?
+- what exact visualizations could be helpful to have in the report?
