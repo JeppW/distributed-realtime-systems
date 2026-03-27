@@ -92,7 +92,7 @@ def nice_visualization(edf_trace_path: str, dm_trace_path: str, out_path: Option
     ax.set_yticklabels(["EDF", "DM"], fontsize=12)
     ax.set_ylim(-0.5, 1.5)
     ax.set_xlabel("Time", fontsize=13)
-    ax.set_title("EDF vs DM timeline (color = task)")
+    ax.set_title("EDF vs DM timeline")
     ax.grid(axis="x", alpha=0.3)
 
     # Legend for tasks
@@ -103,9 +103,9 @@ def nice_visualization(edf_trace_path: str, dm_trace_path: str, out_path: Option
         ax.legend(
             handles=legend_patches,
             title="Tasks",
-            bbox_to_anchor=(1.02, 1.4),
+            bbox_to_anchor=(1.02, 1.0),
             loc="upper left",
-            ncol=2,
+            ncol=1,
             fontsize=11,
             title_fontsize=12,
         )

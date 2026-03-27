@@ -13,7 +13,7 @@ def _choose_job_runtime(task, model) -> int:
         return random.randint(task.bcet, task.wcet)
     elif model == "beta":
         # scaled beta
-        r = random.betavariate(1.5, 3)   # parameters chosen with https://homepage.divms.uiowa.edu/~mbognar/applets/beta.html
+        r = random.betavariate(1.3, 2.3)   # parameters chosen with https://homepage.divms.uiowa.edu/~mbognar/applets/beta.html
         return task.bcet + int(r * (task.wcet - task.bcet))
 
     else:
