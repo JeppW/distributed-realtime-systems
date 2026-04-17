@@ -27,6 +27,7 @@ def simulate(tasks: List[Task], policy: str, runtime_model="uniform"):
     active_jobs: List[Job] = []
     schedule: list = []          # (start, end, task_id | None)
     deadline_misses: list = []
+    response_times: dict = {}    # task_id -> list of response times
 
     current_task_id = None
     segment_start = 0
@@ -70,6 +71,8 @@ def simulate(tasks: List[Task], policy: str, runtime_model="uniform"):
 
             if best.remaining == 0:
                 best.completed = True
+                response_time = (t + 1) - best.release
+                response_times.setdefault(best.task_id, []).append(response_time)
         else:
             chosen_id = None
 
@@ -89,6 +92,7 @@ def simulate(tasks: List[Task], policy: str, runtime_model="uniform"):
         "deadline_misses": deadline_misses,
         "feasible": len(deadline_misses) == 0,
         "hyperperiod": hp,
+        "response_times": response_times,
     }
 
 
