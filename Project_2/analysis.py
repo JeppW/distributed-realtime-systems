@@ -2,7 +2,12 @@ import json
 import os
 import math
 
-DIRECTORY = "test_case_starve"
+DIRECTORY = "test_case_2"
+
+slopes = {
+    2: {'idle': 0.5, 'send': 0.5}, # Class A slopes
+    1: {'idle': 0.5, 'send': 0.5}  # Class B slopes
+}
 
 def load_json(filename):
     with open(os.path.join(DIRECTORY, filename), 'r') as f:
@@ -57,23 +62,25 @@ def calculate_sp_link_wcrt(stream, competitors, bw_mbps):
 # =========================================================
 # 2. CREDIT BASED SHAPER (CBS) LINK CALCULATOR
 # =========================================================
-def calculate_cbs_link_wcrt(stream, competitors, bw_mbps, alpha_idle=0.5, alpha_send=0.5):
+def calculate_cbs_link_wcrt(stream, competitors, bw_mbps, slopes):
     # Base transmission time
     C_i = tx_time(stream['size'], bw_mbps)
+    target_pcp = stream['PCP']
 
     # LPI: Max transmission time of strictly lower priority streams
-    lower = [tx_time(c['size'], bw_mbps) for c in competitors if c['PCP'] < stream['PCP']]
+    lower = [tx_time(c['size'], bw_mbps) for c in competitors if c['PCP'] < target_pcp]
     LPI = max(lower) if lower else 0.0
 
-    # SPI: Sum of same-priority tx times + credit recovery time
-    same = [tx_time(c['size'], bw_mbps) for c in competitors if c['PCP'] == stream['PCP'] and c['id'] != stream['id']]
-    SPI = sum(c * (1 + (alpha_send / alpha_idle)) for c in same)
+    # SPI: Sum of same-priority tx times + credit recovery time using THIS class's slopes
+    same = [tx_time(c['size'], bw_mbps) for c in competitors if c['PCP'] == target_pcp and c['id'] != stream['id']]
+    SPI = sum(c * (1 + (slopes[target_pcp]['send'] / slopes[target_pcp]['idle'])) for c in same)
 
-    # HPI: Class A is 0. Class B accumulates Class A's credit during LPI block.
-    higher = [tx_time(c['size'], bw_mbps) for c in competitors if c['PCP'] > stream['PCP']]
+    # HPI: Time to burn accumulated credit during LPI block + max higher priority frame
+    higher = [tx_time(c['size'], bw_mbps) for c in competitors if c['PCP'] > target_pcp]
     HPI = 0.0
-    if stream['PCP'] == 1 and higher: # Target is Class B and Class A exists
-        HPI = LPI * (alpha_idle / alpha_send) + max(higher)
+    if target_pcp == 1 and higher: # Target is Class B and Class A exists
+        # Use higher-priority class (Class A) slopes
+        HPI = LPI * (slopes[2]['idle'] / slopes[2]['send']) + max(higher)
 
     # WCRT = SPI + HPI + LPI + C_i
     return SPI + HPI + LPI + C_i
@@ -85,6 +92,8 @@ def analyze_network():
     topology = load_json('topology.json')['topology']
     streams = {s['id']: s for s in load_json('streams.json')['streams']}
     routes = load_json('routes.json')['routes']
+    config = load_json('config.json')
+    cbs_slopes = {int(k): v for k, v in config['cbs_slopes'].items()}
     
     # Map streams to specific edges
     link_occupants = {} 
@@ -111,10 +120,11 @@ def analyze_network():
         for src, dst in stream_paths[s_id]:
             edge = (src, dst)
             competitors = [streams[c] for c in link_occupants[edge]]
-            link_bw = 100 #get_link_bw(src, dst, topology)
+            
+            link_bw = get_link_bw(src, dst, topology)
             
             e2e_sp += calculate_sp_link_wcrt(stream, competitors, link_bw)
-            e2e_cbs += calculate_cbs_link_wcrt(stream, competitors, link_bw)
+            e2e_cbs += calculate_cbs_link_wcrt(stream, competitors, link_bw, cbs_slopes)
             
         results[s_id] = {'SP': round(e2e_sp, 2), 'CBS': round(e2e_cbs, 2)}
         
