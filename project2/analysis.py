@@ -2,7 +2,7 @@ import json
 import os
 import math
 
-DIRECTORY = "test_case_1"
+DIRECTORY = "test_case_starve"
 
 def load_json(filename):
     with open(os.path.join(DIRECTORY, filename), 'r') as f:
@@ -111,7 +111,7 @@ def analyze_network():
         for src, dst in stream_paths[s_id]:
             edge = (src, dst)
             competitors = [streams[c] for c in link_occupants[edge]]
-            link_bw = get_link_bw(src, dst, topology)
+            link_bw = 100 #get_link_bw(src, dst, topology)
             
             e2e_sp += calculate_sp_link_wcrt(stream, competitors, link_bw)
             e2e_cbs += calculate_cbs_link_wcrt(stream, competitors, link_bw)

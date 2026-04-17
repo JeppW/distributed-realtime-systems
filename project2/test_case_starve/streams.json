@@ -1,0 +1,69 @@
+{
+    "delay_units": "MICRO_SECOND",
+    "streams": [
+        {
+            "id": 0,
+            "name": "Heavy_AVB_A_1",
+            "source": "ES0",
+            "destinations": [
+                {
+                    "id": "ES1",
+                    "deadline": 100
+                }
+            ],
+            "type": "ISOCHRONOUS",
+            "PCP": 2,
+            "size": 1000,
+            "period": 100,
+            "redundancy": 0
+        },
+        {
+            "id": 1,
+            "name": "Heavy_AVB_A_2",
+            "source": "ES0",
+            "destinations": [
+                {
+                    "id": "ES1",
+                    "deadline": 100
+                }
+            ],
+            "type": "ISOCHRONOUS",
+            "PCP": 2,
+            "size": 250,
+            "period": 100,
+            "redundancy": 0
+        },
+        {
+            "id": 2,
+            "name": "Starving_AVB_B",
+            "source": "ES0",
+            "destinations": [
+                {
+                    "id": "ES1",
+                    "deadline": 500
+                }
+            ],
+            "type": "ISOCHRONOUS",
+            "PCP": 1,
+            "size": 625,
+            "period": 500,
+            "redundancy": 0
+        },
+        {
+            "id": 3,
+            "name": "Best_Effort",
+            "source": "ES0",
+            "destinations": [
+                {
+                    "id": "ES1",
+                    "deadline": 1000
+                }
+            ],
+            "type": "ISOCHRONOUS",
+            "PCP": 0,
+            "size": 1250,
+            "period": 1000,
+            "redundancy": 0
+        }
+    ]
+}

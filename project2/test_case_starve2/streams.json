@@ -1,0 +1,101 @@
+{
+    "delay_units": "MICRO_SECOND",
+    "streams": [
+        {
+            "id": 0,
+            "name": "Burst_A_1",
+            "source": "ES0",
+            "destinations": [
+                {
+                    "id": "ES1",
+                    "deadline": 5000
+                }
+            ],
+            "type": "ISOCHRONOUS",
+            "PCP": 2,
+            "size": 1250,
+            "period": 5000,
+            "redundancy": 0
+        },
+        {
+            "id": 1,
+            "name": "Burst_A_2",
+            "source": "ES0",
+            "destinations": [
+                {
+                    "id": "ES1",
+                    "deadline": 5000
+                }
+            ],
+            "type": "ISOCHRONOUS",
+            "PCP": 2,
+            "size": 1250,
+            "period": 5000,
+            "redundancy": 0
+        },
+        {
+            "id": 2,
+            "name": "Burst_A_3",
+            "source": "ES0",
+            "destinations": [
+                {
+                    "id": "ES1",
+                    "deadline": 5000
+                }
+            ],
+            "type": "ISOCHRONOUS",
+            "PCP": 2,
+            "size": 1250,
+            "period": 5000,
+            "redundancy": 0
+        },
+        {
+            "id": 3,
+            "name": "Burst_A_4",
+            "source": "ES0",
+            "destinations": [
+                {
+                    "id": "ES1",
+                    "deadline": 5000
+                }
+            ],
+            "type": "ISOCHRONOUS",
+            "PCP": 2,
+            "size": 1250,
+            "period": 5000,
+            "redundancy": 0
+        },
+        {
+            "id": 4,
+            "name": "Burst_A_5",
+            "source": "ES0",
+            "destinations": [
+                {
+                    "id": "ES1",
+                    "deadline": 5000
+                }
+            ],
+            "type": "ISOCHRONOUS",
+            "PCP": 2,
+            "size": 1250,
+            "period": 5000,
+            "redundancy": 0
+        },
+        {
+            "id": 5,
+            "name": "Victim_B",
+            "source": "ES0",
+            "destinations": [
+                {
+                    "id": "ES1",
+                    "deadline": 400
+                }
+            ],
+            "type": "ISOCHRONOUS",
+            "PCP": 1,
+            "size": 1250,
+            "period": 400,
+            "redundancy": 0
+        }
+    ]
+}
