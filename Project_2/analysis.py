@@ -2,7 +2,7 @@ import json
 import os
 import math
 
-DIRECTORY = "test_case_2"
+DIRECTORY = "test_case_starve"
 
 slopes = {
     2: {'idle': 0.5, 'send': 0.5}, # Class A slopes
