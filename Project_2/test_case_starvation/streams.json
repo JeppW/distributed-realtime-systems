@@ -1,0 +1,53 @@
+{
+  "delay_units": "MICRO_SECOND",
+  "streams": [
+    {
+      "id": 0,
+      "name": "HighPrio_A",
+      "source": "ES0",
+      "destinations": [
+        {
+          "id": "ES1",
+          "deadline": 5000
+        }
+      ],
+      "type": "ISOCHRONOUS",
+      "PCP": 2,
+      "size": 1100,
+      "period": 100,
+      "redundancy": 0
+    },
+    {
+      "id": 1,
+      "name": "HighPrio_B",
+      "source": "ES0",
+      "destinations": [
+        {
+          "id": "ES1",
+          "deadline": 5000
+        }
+      ],
+      "type": "ISOCHRONOUS",
+      "PCP": 2,
+      "size": 650,
+      "period": 250,
+      "redundancy": 0
+    },
+    {
+      "id": 2,
+      "name": "LowPrio",
+      "source": "ES0",
+      "destinations": [
+        {
+          "id": "ES1",
+          "deadline": 5000
+        }
+      ],
+      "type": "ISOCHRONOUS",
+      "PCP": 1,
+      "size": 250,
+      "period": 1000,
+      "redundancy": 0
+    }
+  ]
+}
