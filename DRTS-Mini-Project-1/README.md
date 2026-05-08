@@ -5,9 +5,9 @@
 
 ## Overview
 
-This project analyses and compares the schedulability and Worst-Case Response Times (WCRTs) of periodic task sets on a single processor core, using two real-time scheduling algorithms: **Deadline Monotonic (DM)** and **Earliest Deadline First (EDF)**.
+This project analyses and compares the schedulability and Worst-Case Response Times (WCRTs) of periodic task sets on a single processor core, using different real-time scheduling algorithms, including **Deadline Monotonic (DM)** and **Earliest Deadline First (EDF)**.
 
-Two software tools were developed: an analytical tool and a simulation tool. These were applied to a collection of task sets to validate theoretical models and explore the conditions under which EDF outperforms DM.
+Two software tools were developed: an analytical tool and a simulation tool. These were applied to a collection of task sets to evaluate schedulability, execution times and worst-case response times across varying utilization levels.
 
 
 ## Project Structure
