@@ -43,9 +43,6 @@ Contains the simulation tool, which implements both DM and EDF scheduling algori
 ### `TestCases/`
 Contains all task set CSV files used as input for both tools, including the provided `automotive` and `uunifast` datasets, as well as additional custom test cases featuring constrained deadlines ($D < T$).
 
-> If no test case is specified when running a tool, a default test case is used automatically.
-
-
 
 ## How to Run
 
