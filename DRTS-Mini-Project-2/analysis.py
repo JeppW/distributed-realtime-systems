@@ -1,16 +1,26 @@
 import json
 import os
 import math
+import argparse
 
-DIRECTORY = "test_case_starve"
 
 slopes = {
     2: {'idle': 0.5, 'send': 0.5}, # Class A slopes
     1: {'idle': 0.5, 'send': 0.5}  # Class B slopes
 }
 
-def load_json(filename):
-    with open(os.path.join(DIRECTORY, filename), 'r') as f:
+def parse_args():
+    parser = argparse.ArgumentParser(description="Run TSN WCRT Analysis.")
+    parser.add_argument(
+        "--TestCase",
+        type=str,
+        default="test_case_1",
+        help="Name of the test case folder inside TestCases/ (default: test_case_1)"
+    )
+    return parser.parse_args()
+
+def load_json(directory, filename):
+    with open(os.path.join(directory, filename), 'r') as f:
         return json.load(f)
 
 def tx_time(size_bytes, bw_mbps):
@@ -88,11 +98,11 @@ def calculate_cbs_link_wcrt(stream, competitors, bw_mbps, slopes):
 # =========================================================
 # 3. MAIN EXECUTION
 # =========================================================
-def analyze_network():
-    topology = load_json('topology.json')['topology']
-    streams = {s['id']: s for s in load_json('streams.json')['streams']}
-    routes = load_json('routes.json')['routes']
-    config = load_json('config.json')
+def analyze_network(directory):
+    topology = load_json(directory, 'topology.json')['topology']
+    streams = {s['id']: s for s in load_json(directory, 'streams.json')['streams']}
+    routes = load_json(directory, 'routes.json')['routes']
+    config = load_json(directory, 'config.json')
     cbs_slopes = {int(k): v for k, v in config['cbs_slopes'].items()}
     
     # Map streams to specific edges
@@ -128,11 +138,30 @@ def analyze_network():
             
         results[s_id] = {'SP': round(e2e_sp, 2), 'CBS': round(e2e_cbs, 2)}
         
+        
     # Output formatting
-    print(f"{'Stream ID':<10} | {'SP WCRT':<10} | {'CBS WCRT':<10}")
-    print("-" * 38)
+    print("\n+" + "-"*11 + "+" + "-"*12 + "+" + "-"*12 + "+")
+    print(f"| {'Stream ID':<9} | {'SP WCRT':<10} | {'CBS WCRT':<10} |")
+    print("+" + "-"*11 + "+" + "-"*12 + "+" + "-"*12 + "+")
     for s_id, vals in sorted(results.items()):
-        print(f"{s_id:<10} | {str(vals['SP']).replace('.', ','):<10} | {str(vals['CBS']).replace('.', ','):<10}")
+        sp_str = str(vals['SP']).replace('.', ',')
+        cbs_str = str(vals['CBS']).replace('.', ',')
+        
+        print(f"| {s_id:<9} | {sp_str:<10} | {cbs_str:<10} |")
+    
+    print("+" + "-"*11 + "+" + "-"*12 + "+" + "-"*12 + "+\n")
+
+def main():
+    
+    args = parse_args()
+    
+    directory = os.path.join("TestCases", args.TestCase)
+    
+    if not os.path.exists(directory):
+        print(f"Error: Test case folder '{directory}' not found.")
+        return
+
+    analyze_network(directory)
 
 if __name__ == "__main__":
-    analyze_network()
+    main()

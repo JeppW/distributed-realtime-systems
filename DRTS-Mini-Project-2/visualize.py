@@ -4,9 +4,17 @@ import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+import argparse
 
-TEST_CASE_DIR = "test_case_1" # Or "test_case_1", "test_case_2", etc.
-
+def parse_args():
+    parser = argparse.ArgumentParser(description="Visualize TSN Network Queues.")
+    parser.add_argument(
+        "--TestCase",
+        type=str,
+        default="test_case_1",
+        help="Name of the test case folder inside TestCases/ (default: test_case_1)"
+    )
+    return parser.parse_args()
 
 def load_json(filepath):
     """Utility function to load JSON data from a file."""
@@ -159,12 +167,19 @@ def visualize_network_with_queues(G, test_case_name):
     plt.tight_layout()
     plt.show()
 
-if __name__ == "__main__":
-    print(f"Loading files from directory: {TEST_CASE_DIR}")
+def main():
+    args = parse_args()
+    directory = os.path.join("TestCases", args.TestCase)
+    
+    print(f"\nLoading Visualization Data from: {directory}")
 
-    topo_path = os.path.join(TEST_CASE_DIR, 'topology.json')
-    streams_path = os.path.join(TEST_CASE_DIR, 'streams.json')
-    routes_path = os.path.join(TEST_CASE_DIR, 'routes.json')
+    if not os.path.exists(directory):
+        print(f"Error: Test case folder '{directory}' not found.")
+        return
+
+    topo_path = os.path.join(directory, 'topology.json')
+    streams_path = os.path.join(directory, 'streams.json')
+    routes_path = os.path.join(directory, 'routes.json')
     
     topology_data = load_json(topo_path)
     streams_data = load_json(streams_path)
@@ -172,4 +187,7 @@ if __name__ == "__main__":
 
     if topology_data and streams_data and routes_data:
         tsn_graph = build_tsn_graph(topology_data, streams_data, routes_data)
-        visualize_network_with_queues(tsn_graph, TEST_CASE_DIR)
+        visualize_network_with_queues(tsn_graph, args.TestCase)
+
+if __name__ == "__main__":
+    main()

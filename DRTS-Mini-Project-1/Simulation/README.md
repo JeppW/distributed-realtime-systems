@@ -5,7 +5,7 @@
 
 ## Overview
 
-This tool simulates preemptive real-time scheduling over one hyperperiod and empirically measures response times for each task. It supports three scheduling policies: **Rate Monotonic (RM)**, **Deadline Monotonic (DM)**, and **Earliest Deadline First (EDF)**.
+This tool simulates preemptive real-time scheduling over one hyperperiod and empirically measures response times for each task. It supports two scheduling policies: **Deadline Monotonic (DM)** and **Earliest Deadline First (EDF)**.
 
 Job execution times can be sampled stochastically or fixed at WCET for direct comparison with analytical results. The tool outputs a schedule trace and a summary, and can generate Gantt chart visualizations.
 
@@ -17,6 +17,7 @@ Job execution times can be sampled stochastically or fixed at WCET for direct co
 Simulation/
 │
 ├── simulation.py       # Entry point — run this
+├── README.md           # This file
 └── src/
     ├── models.py       # Task and Job dataclasses
     ├── simulator.py    # Core simulation logic
@@ -54,7 +55,7 @@ python simulation.py simulate --dataset <dataset> --partition <partition> --file
 | `--dataset`   | `automotive`, `uunifast`            | `automotive`   |
 | `--partition` | `0.10-util` ... `1.00-util`         | `0.10-util`    |
 | `--file-num`  | `0` ... `99`                        | `1`            |
-| `--policy`    | `RM`, `DM`, `EDF`                   | `RM`           |
+| `--policy`    | `DM`, `EDF`                   | `DM`           |
 | `--runtime`   | `wcet`, `uniform`, `beta`           | `uniform`      |
 | `--output`    | Path to output directory            | `/output`    |
 

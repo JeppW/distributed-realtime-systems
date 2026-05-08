@@ -3,9 +3,8 @@ import os
 import heapq
 import math
 from functools import reduce
+import argparse
 
-# Directory where the input JSON files are expected to be located
-DIRECTORY = "test_case_starve"
 
 # =========================================================
 # 1. EVENT PRIORITIES (Fixes simultaneous event bugs)
@@ -20,10 +19,18 @@ PRIO_CREDIT_ZERO = 3   # CBS credit reaching exactly 0
 # =========================================================
 # 2. UTILITY & MATH FUNCTIONS
 # =========================================================
-def load_json(filename):
-    """Utility to load and parse a JSON file from the target directory."""
-    path = os.path.join(DIRECTORY, filename)
-    with open(path, 'r') as f:
+def parse_args():
+    parser = argparse.ArgumentParser(description="Run TSN Simulation.")
+    parser.add_argument(
+        "--TestCase",
+        type=str,
+        default="test_case_1",
+        help="Name of the test case folder inside TestCases/ (default: test_case_1)"
+    )
+    return parser.parse_args()
+
+def load_json(directory, filename):
+    with open(os.path.join(directory, filename), 'r') as f:
         return json.load(f)
 
 def compute_hyperperiod(streams):
@@ -268,14 +275,22 @@ class Simulator:
 # 5. MAIN EXECUTION & DATA PARSING
 # =========================================================
 def main():
+
+    args = parse_args()
+    directory = os.path.join("TestCases", args.TestCase)
+    
+    if not os.path.exists(directory):
+        print(f"Error: Test case folder '{directory}' not found.")
+        return
+    
     # Load configuration inputs
-    topology = load_json('topology.json')['topology']
-    raw_streams = load_json('streams.json')['streams']
-    routes = load_json('routes.json')['routes']
+    topology = load_json(directory, 'topology.json')['topology']
+    raw_streams = load_json(directory, 'streams.json')['streams']
+    routes = load_json(directory, 'routes.json')['routes']
     
     # Load CBS parameters or default to 0.5/0.5
     try:
-        config = load_json('config.json')
+        config = load_json(directory, 'config.json')
         cbs_slopes = {int(k): v for k, v in config['cbs_slopes'].items()}
     except FileNotFoundError:
         cbs_slopes = {2: {'idle': 0.5, 'send': 0.5}, 1: {'idle': 0.5, 'send': 0.5}}
@@ -328,6 +343,10 @@ def main():
         # If result is -1.0, the frame never reached the end (starved)
         sp_str = f"{sp_results[s_id]:.2f}" if sp_results[s_id] != -1.0 else "STARVED"
         cbs_str = f"{cbs_results[s_id]:.2f}" if cbs_results[s_id] != -1.0 else "STARVED"
+
+        sp_str = sp_str.replace('.', ',') if sp_str != "STARVED" else sp_str
+        cbs_str = cbs_str.replace('.', ',') if cbs_str != "STARVED" else cbs_str
+
         print(f"{s_id:<8} | {s['size']:<8} | {s['PCP']:<4} | {s['period']:<12} | {sp_str:<12} | {cbs_str:<12}")
         
     print("================================================================================\n")

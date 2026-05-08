@@ -29,7 +29,7 @@ def parse_args():
     parser.add_argument("--dataset", default="automotive", choices=["automotive", "uunifast"], help="Pick a dataset root to search for the csv (overrides csv if found)")
     parser.add_argument("--partition", default="0.10-util", choices=[f"{i/100:.2f}-util" for i in range(10, 101, 10)], help="Choose dataset partition (e.g. 0.10-util)")
     parser.add_argument("--file-num", type=int, default=1, choices=[i for i in range(100)], help="filenumber in dataset partition")
-    parser.add_argument("--policy", default="RM", choices=["RM", "DM", "EDF"], help="Scheduling policy")
+    parser.add_argument("--policy", default="DM", choices=["DM", "EDF"], help="Scheduling policy")
     parser.add_argument("--runtime", default="uniform", choices=["wcet", "uniform", "beta"], help="How to choose job runtimes")
     # Default output directory: sibling `output` folder next to the Simulation folder
     default_output = os.path.abspath(os.path.join(os.path.dirname(__file__), "output"))
