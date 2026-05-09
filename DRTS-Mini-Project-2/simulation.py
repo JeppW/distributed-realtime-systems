@@ -56,13 +56,15 @@ def compute_hyperperiod(streams):
 # =========================================================
 class Frame:
     """Represents a single packet/frame traveling through the network."""
-    def __init__(self, stream_id, pcp, size_bytes, gen_time, path):
+    def __init__(self, stream_id, pcp, size_bytes, gen_time, path,deadline):
         self.stream_id = stream_id
         self.pcp = pcp                  # Priority Code Point (0, 1, or 2)
         self.size = size_bytes
         self.gen_time = gen_time        # Timestamp when the frame was originally created
         self.path = path                # List of (Node, Port) tuples representing the route
         self.hop_index = 0              # Tracks the frame's current position in the path
+        self.deadline = deadline
+
 
 class Port:
     """Represents an egress (outgoing) port on a network node/switch."""
@@ -126,7 +128,7 @@ class Simulator:
             bw = link.get('bandwidth_mbps', 100)
             delay = link.get('delay', 0.0)
             self.ports[pid] = Port(pid, bw, delay, cbs_slopes)
-            
+
         self.streams = streams
         # Dictionary to record end-to-end delays observed for each stream
         self.observed_delays = {s['id']: [] for s in streams}
@@ -158,15 +160,16 @@ class Simulator:
             elif event_type == 'CREDIT_ZERO': self.handle_credit_zero(payload)
                 
         # Return maximum delay (Worst-Case Delay) per stream, or -1.0 if never arrived
-        return {s_id: max(delays) if delays else -1.0 for s_id, delays in self.observed_delays.items()}
+        return {s_id: max(delays) if (delays and delays != -1.0) else -1.0 for s_id, delays in self.observed_delays.items()}
 
     def handle_generate(self, payload):
         """Creates a new frame and schedules its arrival at the first port, and schedules the next generation."""
         stream = payload['stream']
         gen_time = payload['gen_time']
+        deadline = stream['destinations'][0]['deadline']
         
         # Create the actual frame
-        frame = Frame(stream['id'], stream['PCP'], stream['size'], gen_time, stream['path'])
+        frame = Frame(stream['id'], stream['PCP'], stream['size'], gen_time, stream['path'], deadline)
         
         # Schedule the *next* frame generation for this stream
         next_gen = gen_time + stream['period']
@@ -179,10 +182,13 @@ class Simulator:
         """Processes a frame arriving at a port queue or reaching its final destination."""
         frame = payload['frame']
         port_id = payload['port_id']
+  
         
         # Base case: Frame has reached the end of its path
         if frame.hop_index == len(frame.path) - 1:
             delay = self.current_time - frame.gen_time
+            
+            
             self.observed_delays[frame.stream_id].append(delay)
             return
 
@@ -305,14 +311,14 @@ def main():
     for s in raw_streams:
         streams.append({
             'id': s['id'], 'PCP': s['PCP'], 'size': s['size'],
-            'period': s['period'], 'path': routes_map[s['id']]
+            'period': s['period'], 'destinations': s['destinations'],'path': routes_map[s['id']]
         })
 
     # Calculate simulation runtime based on hyperperiod
     hyperperiod = compute_hyperperiod(streams)
     MAX_SIM_TIME = hyperperiod * 2.0
     # Hardcoded overwrite for consistent testing runtime
-    MAX_SIM_TIME = 100000
+    #MAX_SIM_TIME = 100000
     
     print("\n" + "="*80)
     print(f"Network Hyperperiod calculated: {hyperperiod:,.2f} us")

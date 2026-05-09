@@ -121,6 +121,8 @@ def analyze_network(directory):
     results = {}
 
     for s_id, stream in streams.items():
+        deadline = stream['destinations'][0]['deadline']
+      
         if stream['PCP'] == 0: 
             continue # Skip Best Effort
             
@@ -135,8 +137,17 @@ def analyze_network(directory):
             
             e2e_sp += calculate_sp_link_wcrt(stream, competitors, link_bw)
             e2e_cbs += calculate_cbs_link_wcrt(stream, competitors, link_bw, cbs_slopes)
-            
-        results[s_id] = {'SP': round(e2e_sp, 2), 'CBS': round(e2e_cbs, 2)}
+        
+        e2e_sp = round(e2e_sp, 2)
+        e2e_cbs = round(e2e_cbs, 2)
+
+        if(e2e_sp > deadline): 
+            e2e_sp = "STARVED"
+        
+        if(e2e_cbs > deadline):
+            e2e_cbs = "STARVED"
+
+        results[s_id] = {'SP': e2e_sp, 'CBS': e2e_cbs}
         
         
     # Output formatting

@@ -3,49 +3,78 @@
   "streams": [
     {
       "id": 0,
-      "name": "HighPrio_A",
+      "name": "HighPrio_0",
       "source": "ES0",
-      "destinations": [
-        {
-          "id": "ES1",
-          "deadline": 5000
-        }
-      ],
+      "destinations": [{"id": "ES1", "deadline": 500}],
       "type": "ISOCHRONOUS",
       "PCP": 2,
-      "size": 1100,
-      "period": 100,
+      "size": 500,
+      "period": 500,
       "redundancy": 0
     },
     {
       "id": 1,
-      "name": "HighPrio_B",
+      "name": "HighPrio_1",
       "source": "ES0",
-      "destinations": [
-        {
-          "id": "ES1",
-          "deadline": 5000
-        }
-      ],
+      "destinations": [{"id": "ES1", "deadline": 500}],
       "type": "ISOCHRONOUS",
       "PCP": 2,
-      "size": 650,
-      "period": 250,
+      "size": 500,
+      "period": 500,
       "redundancy": 0
     },
     {
       "id": 2,
-      "name": "LowPrio",
+      "name": "HighPrio_2",
       "source": "ES0",
-      "destinations": [
-        {
-          "id": "ES1",
-          "deadline": 5000
-        }
-      ],
+      "destinations": [{"id": "ES1", "deadline": 500}],
+      "type": "ISOCHRONOUS",
+      "PCP": 2,
+      "size": 500,
+      "period": 500,
+      "redundancy": 0
+    },
+    {
+      "id": 3,
+      "name": "HighPrio_3",
+      "source": "ES0",
+      "destinations": [{"id": "ES1", "deadline": 500}],
+      "type": "ISOCHRONOUS",
+      "PCP": 2,
+      "size": 500,
+      "period": 500,
+      "redundancy": 0
+    },
+    {
+      "id": 4,
+      "name": "HighPrio_4",
+      "source": "ES0",
+      "destinations": [{"id": "ES1", "deadline": 500}],
+      "type": "ISOCHRONOUS",
+      "PCP": 2,
+      "size": 500,
+      "period": 500,
+      "redundancy": 0
+    },
+    {
+      "id": 5,
+      "name": "HighPrio_5",
+      "source": "ES0",
+      "destinations": [{"id": "ES1", "deadline": 500}],
+      "type": "ISOCHRONOUS",
+      "PCP": 2,
+      "size": 500,
+      "period": 500,
+      "redundancy": 0
+    },
+    {
+      "id": 6,
+      "name": "LowPrio_0",
+      "source": "ES0",
+      "destinations": [{"id": "ES1", "deadline": 250}],
       "type": "ISOCHRONOUS",
       "PCP": 1,
-      "size": 250,
+      "size": 500,
       "period": 1000,
       "redundancy": 0
     }

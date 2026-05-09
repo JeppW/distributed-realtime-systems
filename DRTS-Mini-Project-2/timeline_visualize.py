@@ -1,70 +1,80 @@
 import matplotlib.pyplot as plt
+import numpy as np
 
-def create_gantt_chart():
-    # Set up the figure with two subplots (one above the other)
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 6), sharex=True)
-    fig.canvas.manager.set_window_title('TSN Scheduling: SP vs CBS')
-    
-    # Y-axis configuration
-    y_ticks = [15, 25, 35]
-    y_labels = ['P0 (Best Effort)', 'P1 (Medium)', 'P2 (High)']
-    
-    # Colors for each priority
-    colors = {'P2': '#e74c3c', 'P1': '#f39c12', 'P0': '#3498db'}
-    
-    # ==========================================
-    # Plot 1: Strict Priority (SP) - Starvation
-    # ==========================================
-    ax1.set_title('Strict Priority (SP) - P0 is Starved', fontsize=12, fontweight='bold')
-    
-    # Under SP, P2 and P1 dominate the bandwidth. P0 never gets a chance.
-    # Data format: [(start_time, duration), ...]
-    sp_p2_blocks = [(0, 15), (30, 15), (60, 15)]
-    sp_p1_blocks = [(15, 15), (45, 15), (75, 15)]
-    sp_p0_blocks = [] # Empty! Starved.
-    
-    ax1.broken_barh(sp_p2_blocks, (30, 9), facecolors=colors['P2'], edgecolor='black')
-    ax1.broken_barh(sp_p1_blocks, (20, 9), facecolors=colors['P1'], edgecolor='black')
-    ax1.broken_barh(sp_p0_blocks, (10, 9), facecolors=colors['P0'], edgecolor='black')
-    
-    # ==========================================
-    # Plot 2: Credit-Based Shaper (CBS)
-    # ==========================================
-    ax2.set_title('Credit-Based Shaper (CBS) - Bandwidth is Shared', fontsize=12, fontweight='bold')
-    
-    # Under CBS, P2 and P1 run out of credit, forcing pauses where P0 can transmit.
-    cbs_p2_blocks = [(0, 10), (30, 10), (60, 10)]
-    cbs_p1_blocks = [(10, 10), (40, 10), (70, 10)]
-    cbs_p0_blocks = [(20, 10), (50, 10), (80, 10)] # P0 gets slices of time!
-    
-    ax2.broken_barh(cbs_p2_blocks, (30, 9), facecolors=colors['P2'], edgecolor='black')
-    ax2.broken_barh(cbs_p1_blocks, (20, 9), facecolors=colors['P1'], edgecolor='black')
-    ax2.broken_barh(cbs_p0_blocks, (10, 9), facecolors=colors['P0'], edgecolor='black')
+def create_credit_chart():
+    pcp2_idle = 0.48
+    pcp2_send = 0.52
+    pcp1_idle = 0.04
+    pcp1_send = 0.96
+    frame_tx  = 40
 
-    # ==========================================
-    # Formatting and Styling
-    # ==========================================
-    for ax in [ax1, ax2]:
-        ax.set_ylim(5, 45)
-        ax.set_xlim(0, 90)
-        ax.set_yticks(y_ticks)
-        ax.set_yticklabels(y_labels)
-        ax.grid(True, axis='x', linestyle='--', alpha=0.7)
-        ax.set_ylabel('Queue Priority')
+    timeline_pcp2 = [(0, 0.0)]
+    timeline_pcp1 = [(0, 0.0)]
 
-    ax2.set_xlabel('Time (Synthetic Units)')
-    
-    # Add a custom legend
-    import matplotlib.patches as mpatches
-    legend_patches = [
-        mpatches.Patch(color=colors['P2'], label='Priority 2 (High)'),
-        mpatches.Patch(color=colors['P1'], label='Priority 1 (Medium)'),
-        mpatches.Patch(color=colors['P0'], label='Priority 0 (Best Effort)')
-    ]
-    fig.legend(handles=legend_patches, loc='upper right', bbox_to_anchor=(0.95, 0.95))
+    # PCP2 frame 0: t=0 to t=40
+    pcp2_c = 0.0 - frame_tx * pcp2_send   # -20.8
+    pcp1_c = 0.0 + frame_tx * pcp1_idle   # 1.6
+    timeline_pcp2.append((40, pcp2_c))
+    timeline_pcp1.append((40, pcp1_c))
+
+    # PCP1 transmits: t=40 to t=80
+    pcp2_c = pcp2_c + frame_tx * pcp2_idle  # -1.6
+    pcp1_c = pcp1_c - frame_tx * pcp1_send  # -36.8
+    timeline_pcp2.append((80, pcp2_c))
+    timeline_pcp1.append((80, pcp1_c))
+
+    # Both idle until PCP2 recovers to 0
+    t_recover = 80 + abs(pcp2_c) / pcp2_idle  # 83.33
+    pcp1_c = pcp1_c + (t_recover - 80) * pcp1_idle
+    timeline_pcp2.append((t_recover, 0.0))
+    timeline_pcp1.append((t_recover, pcp1_c))
+
+    # PCP2 frames 1-5 back to back
+    t = t_recover
+    pcp2_c = 0.0
+    for i in range(5):
+        t_end = t + frame_tx
+        pcp2_c_new = pcp2_c - frame_tx * pcp2_send
+        pcp1_c_new = pcp1_c + frame_tx * pcp1_idle
+        timeline_pcp2.append((t_end, pcp2_c_new))
+        timeline_pcp1.append((t_end, pcp1_c_new))
+        pcp2_c = pcp2_c_new
+        pcp1_c = pcp1_c_new
+        t = t_end
+
+        if pcp2_c < 0 and i < 4:
+            t_recover2 = t + abs(pcp2_c) / pcp2_idle
+            pcp1_c = pcp1_c + (t_recover2 - t) * pcp1_idle
+            timeline_pcp2.append((t_recover2, 0.0))
+            timeline_pcp1.append((t_recover2, pcp1_c))
+            pcp2_c = 0.0
+            t = t_recover2
+
+    t2, c2 = zip(*timeline_pcp2)
+    t1, c1 = zip(*timeline_pcp1)
+
+    fig, ax = plt.subplots(figsize=(10, 4))
+
+
+    ax.plot(t2, c2, color='#e74c3c', linewidth=2, label='PCP2 (Class A)')
+    ax.plot(t1, c1, color='#f39c12', linewidth=2, label='PCP1 (Class B)')
+    ax.axhline(y=0, color='black', linestyle='--', linewidth=1.2, alpha=0.7, label='Credit = 0 threshold')
+    ax.axvspan(40, 80, alpha=0.1, color='#f39c12', label='PCP1 transmitting')
+
+    # Fix x axis to end at 320us with ticks every 50us
+    ax.set_xlim(0, 320)
+    ax.set_xticks(range(0, 321, 50))
+
+    ax.set_xlabel('Time (μs)', fontsize=11)
+    ax.set_ylabel('Credit (units)', fontsize=11)
+    ax.set_title('CBS Credit Evolution — Starvation Test Case',
+                 fontsize=11, fontweight='bold')
+    ax.legend(fontsize=9, loc='lower right')
+    ax.grid(True, linestyle=':', alpha=0.6)
 
     plt.tight_layout()
+    plt.savefig('credit_evolution_starvation.png', dpi=150, bbox_inches='tight')
     plt.show()
 
 if __name__ == "__main__":
-    create_gantt_chart()
+    create_credit_chart()

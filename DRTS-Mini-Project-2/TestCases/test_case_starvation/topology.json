@@ -4,14 +4,8 @@
     "default_bandwidth_mbps": 100,
     "switches": [],
     "end_systems": [
-      {
-        "id": "ES0",
-        "domain": 0
-      },
-      {
-        "id": "ES1",
-        "domain": 0
-      }
+      {"id": "ES0", "domain": 0},
+      {"id": "ES1", "domain": 0}
     ],
     "links": [
       {
