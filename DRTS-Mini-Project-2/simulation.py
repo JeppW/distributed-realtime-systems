@@ -160,6 +160,7 @@ class Simulator:
             elif event_type == 'CREDIT_ZERO': self.handle_credit_zero(payload)
                 
         # Return maximum delay (Worst-Case Delay) per stream, or -1.0 if never arrived
+        print(self.observed_delays.items())
         return {s_id: max(delays) if (delays and delays != -1.0) else -1.0 for s_id, delays in self.observed_delays.items()}
 
     def handle_generate(self, payload):
@@ -187,7 +188,6 @@ class Simulator:
         # Base case: Frame has reached the end of its path
         if frame.hop_index == len(frame.path) - 1:
             delay = self.current_time - frame.gen_time
-            
             
             self.observed_delays[frame.stream_id].append(delay)
             return
@@ -339,21 +339,23 @@ def main():
     print("\n================================================================================")
     print("                      TSN SIMULATION MAXIMUM DELAY RESULTS                      ")
     print("================================================================================")
-    print(f"{'Stream':<8} | {'Size(B)':<8} | {'PCP':<4} | {'Period(us)':<12} | {'SP WCD (us)':<12} | {'CBS WCD (us)':<12}")
+    print(f"{'Stream':<8} | {'Size(B)':<8} | {'PCP':<4} | {'Period(us)':<12} | {'SP WCD (us)':<17} | {'CBS WCD (us)':<17}")
     print("-" * 80)
     
     for s in streams:
         # Ignore best effort traffic in the final delay reporting
         if s['PCP'] == 0: continue 
         s_id = s['id']
+        deadline = s['destinations'][0]['deadline']
+        
         # If result is -1.0, the frame never reached the end (starved)
-        sp_str = f"{sp_results[s_id]:.2f}" if sp_results[s_id] != -1.0 else "STARVED"
-        cbs_str = f"{cbs_results[s_id]:.2f}" if cbs_results[s_id] != -1.0 else "STARVED"
+        sp_str = f"{sp_results[s_id]:.2f}" if sp_results[s_id] <= deadline else f"STARVED({sp_results[s_id]})"
+        cbs_str = f"{cbs_results[s_id]:.2f}" if cbs_results[s_id] <= deadline else f"STARVED({cbs_results[s_id]})"
 
         sp_str = sp_str.replace('.', ',') if sp_str != "STARVED" else sp_str
         cbs_str = cbs_str.replace('.', ',') if cbs_str != "STARVED" else cbs_str
 
-        print(f"{s_id:<8} | {s['size']:<8} | {s['PCP']:<4} | {s['period']:<12} | {sp_str:<12} | {cbs_str:<12}")
+        print(f"{s_id:<8} | {s['size']:<8} | {s['PCP']:<4} | {s['period']:<12} | {sp_str:<17} | {cbs_str:<17}")
         
     print("================================================================================\n")
 

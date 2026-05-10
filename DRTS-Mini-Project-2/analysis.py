@@ -142,25 +142,25 @@ def analyze_network(directory):
         e2e_cbs = round(e2e_cbs, 2)
 
         if(e2e_sp > deadline): 
-            e2e_sp = "STARVED"
+            e2e_sp = f"STARVED({e2e_sp})"
         
         if(e2e_cbs > deadline):
-            e2e_cbs = "STARVED"
+             e2e_cbs = f"STARVED({e2e_cbs})"
 
         results[s_id] = {'SP': e2e_sp, 'CBS': e2e_cbs}
         
         
     # Output formatting
-    print("\n+" + "-"*11 + "+" + "-"*12 + "+" + "-"*12 + "+")
-    print(f"| {'Stream ID':<9} | {'SP WCRT':<10} | {'CBS WCRT':<10} |")
-    print("+" + "-"*11 + "+" + "-"*12 + "+" + "-"*12 + "+")
+    print("\n+" + "-"*11 + "+" + "-"*20 + "+" + "-"*20 + "+")
+    print(f"| {'Stream ID':<9} | {'SP WCRT':<18} | {'CBS WCRT':<18} |")
+    print("+" + "-"*11 + "+" + "-"*20 + "+" + "-"*20 + "+")
     for s_id, vals in sorted(results.items()):
         sp_str = str(vals['SP']).replace('.', ',')
         cbs_str = str(vals['CBS']).replace('.', ',')
         
-        print(f"| {s_id:<9} | {sp_str:<10} | {cbs_str:<10} |")
+        print(f"| {s_id:<9} | {sp_str:<18} | {cbs_str:<18} |")
     
-    print("+" + "-"*11 + "+" + "-"*12 + "+" + "-"*12 + "+\n")
+    print("+" + "-"*11 + "+" + "-"*20 + "+" + "-"*20 + "+\n")
 
 def main():
     

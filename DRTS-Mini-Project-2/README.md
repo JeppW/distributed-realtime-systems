@@ -7,51 +7,62 @@
 
 This project provides a suite of tools for evaluating and visualizing Time-Sensitive Networking (TSN) experiments. It focuses on comparing two traffic scheduling mechanisms: **Strict Priority (SP)** and **Credit-Based Shaper (CBS)**.
 
-The suite includes four primary tools: an analytical Worst-Case Response Time (WCRT) calculator, a discrete-event simulator, a network topology visualizer, and a timeline/Gantt chart generator. All tools are designed to read modular network configurations from structured JSON test cases.
+The suite includes three tools: an analytical Worst-Case Response Time (WCRT) calculator, a discrete-event simulator, and a network topology visualizer. All tools read their configuration from structured JSON test cases located in the `TestCases/` directory.
+
+
 
 ## Project Structure
 
 ```text
 DRTS-Mini-Project-2/
 │
-├── analysis.py             # Compositional WCRT calculator
-├── simulation.py           # Discrete-event network simulator
-├── visualize.py            # Network topology and queue visualizer
-├── timeline_visualize.py   # SP vs CBS Gantt chart concept visualizer
-├── README.md               # This file
+├── analysis.py                 # Compositional WCRT analytical calculator
+├── simulation.py               # Discrete-event network simulator
+├── Topology_visualization.py   # Network topology visualizer
+├── README.md                   # This file
 │
-└── TestCases/              # Subfolders containing JSON network configurations
+└── TestCases/                  # Subfolders containing JSON network configurations
     ├── test_case_1/
     ├── test_case_2/
+    ├── test_case_3/
     ├── test_case_starvation/
-    ├── test_case_starve/
     └── ...
 ```
 
+
+
 ## Requirements
 
-Make sure you have **Python 3** installed along with the following library:
+Make sure you have **Python 3** installed along with the following libraries:
 
 ```bash
 pip install matplotlib networkx numpy
 ```
 
+
+
 ## Input Data Format
 
-All tools (except the timeline visualizer) dynamically load their configuration from a specified folder inside the `TestCases/` directory. A valid test case folder must contain:
+All tools dynamically load their configuration from a specified folder inside `TestCases/`. A valid test case folder must contain:
 
-- `topology.json` — Defines nodes, links, and bandwidth.
-- `streams.json` — Defines traffic flows (ID, PCP priority, size, period).
-- `routes.json` — Maps flows to specific network paths.
-- `config.json` (Optional) — Defines CBS slopes (idle/send rates). Defaults to `0.5` if missing.
+| File | Description |
+|------|-------------|
+| `topology.json` | Defines nodes (end systems, switches), links, and bandwidths |
+| `streams.json` | Defines traffic flows (ID, PCP priority, frame size, period, deadline) |
+| `routes.json` | Maps each flow to its specific network path |
+| `config.json` | Defines CBS slopes (idle/send rates). Defaults to `0.5` if missing |
+
+
 
 ## How to Run
 
-Navigate to the `DRTS-Mini-Project-2/` directory in your terminal. You can run the tools using the `--TestCase` flag to point to any folder inside `TestCases/`.
+Navigate to the `DRTS-Mini-Project-2/` directory and run any tool using the `--TestCase` flag.
+
+---
 
 ### 1. Analytical Tool (`analysis.py`)
 
-Computes the theoretical Worst-Case Response Time (WCRT) for each stream using compositional analysis across all links in the route.
+Computes the theoretical Worst-Case Response Time (WCRT) for each stream using compositional analysis across all links in the route, under both SP and CBS.
 
 ```bash
 python analysis.py --TestCase <folder_name>
@@ -60,14 +71,16 @@ python analysis.py --TestCase <folder_name>
 **Example:**
 
 ```bash
-python analysis.py --TestCase test_case_starve
+python analysis.py --TestCase test_case_1
 ```
 
-Outputs a formatted table comparing SP WCRT and CBS WCRT (in microseconds).
+Outputs a formatted table comparing SP WCRT and CBS WCRT in microseconds. Streams exceeding their deadline are flagged as `STARVED(value)`, where `value` is the computed WCRT that exceeded the deadline.
+
+---
 
 ### 2. Simulation Tool (`simulation.py`)
 
-Runs a discrete-event simulation tracking packet generation, queueing, and exact transmission times over the network hyperperiod.
+Runs a discrete-event simulation tracking frame generation, queueing, and transmission over the network hyperperiod under both SP and CBS.
 
 ```bash
 python simulation.py --TestCase <folder_name>
@@ -79,35 +92,27 @@ python simulation.py --TestCase <folder_name>
 python simulation.py --TestCase test_case_starvation
 ```
 
-Outputs the empirically observed Maximum Delay per stream, or `STARVED` if a lower-priority stream is completely blocked by SP.
+Outputs the empirically observed maximum delay per stream under both SP and CBS. Streams that miss their deadline are flagged as `STARVED(value)`, where `value` is the maximum observed delay that exceeded the deadline.
 
-### 3. Network Visualizer (`visualize.py`)
+---
 
-Generates an interactive 2D graph of the network topology, explicitly showing which egress queues (PCP 0, 1, 2) are active on each link.
+### 3. Topology Visualizer (`Topology_visualization.py`)
 
-```bash
-python visualize.py --TestCase <folder_name>
-```
-
-**Example:**
+Generates a clean diagram of the network topology, showing end systems, switches, link bandwidths, and propagation delays.
 
 ```bash
-python visualize.py --TestCase test_case_2
+python Topology_visualization.py --TestCase <folder_name>
 ```
 
-### 4. Timeline Visualizer (`timeline_visualize.py`)
-
-A standalone conceptual visualization tool that generates a Gantt chart comparing how SP and CBS allocate bandwidth over time, highlighting the "starvation" phenomenon.
+Use the `--save` flag to save the figure as a PNG instead of displaying it:
 
 ```bash
-python timeline_visualize.py
+python Topology_visualization.py --TestCase test_case_1 --save
 ```
 
-## Troubleshooting
+---
 
-- **FileNotFoundError:** Ensure the folder name you pass to `--TestCase` exactly matches a folder inside the `TestCases/` directory, and that it contains the required JSON files.
-- **Empty Output / Exits Early:** Verify that the `streams.json` file has valid `period` and `size` values, and that `routes.json` correctly maps flow IDs to valid topology nodes.
-- **Decimal Formatting:** Output tables use European comma formatting (e.g., `400,0`) to align with standard reporting requirements.
+> If no `--TestCase` is provided, all three tools default to `TestCases/test_case_1`.
 
 ---
 
